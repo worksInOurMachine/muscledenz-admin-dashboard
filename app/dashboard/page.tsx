@@ -1,174 +1,199 @@
 "use client"
 
-import { useSession } from "next-auth/react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Users, Package, ShoppingCart, TrendingUp, Activity, Dumbbell, Calendar, Target } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
+import { strapi } from "@/lib/strapiSDK/strapi"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+} from "recharts"
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
-  const userRole = (session?.user as any)?.role
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  const stats = [
-    {
-      title: "Total Members",
-      value: "2,847",
-      change: "+12%",
-      icon: Users,
-      color: "text-blue-600",
-    },
-    {
-      title: "Active Products",
-      value: "156",
-      change: "+3%",
-      icon: Package,
-      color: "text-green-600",
-    },
-    {
-      title: "Orders Today",
-      value: "23",
-      change: "+8%",
-      icon: ShoppingCart,
-      color: "text-orange-600",
-    },
-    {
-      title: "Revenue",
-      value: "$12,847",
-      change: "+15%",
-      icon: TrendingUp,
-      color: "text-primary",
-    },
-  ]
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await strapi.axios.get("/analytics/dashboard")
+        setData(res.data)
+      } catch (err) {
+        console.error("Failed to fetch dashboard data", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
-  const recentActivities = [
-    { action: "New member registration", user: "John Doe", time: "2 minutes ago" },
-    { action: "Product order placed", user: "Jane Smith", time: "5 minutes ago" },
-    { action: "Membership renewed", user: "Mike Johnson", time: "10 minutes ago" },
-    { action: "Equipment maintenance", user: "System", time: "1 hour ago" },
-  ]
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[80vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="flex justify-center items-center min-h-[80vh]">
+        <p className="text-red-500 text-lg font-medium">
+          Failed to load analytics
+        </p>
+      </div>
+    )
+  }
+
+  const COLORS = ["#4ade80", "#60a5fa", "#facc15", "#f87171", "#a78bfa"]
+
+  // Monthly revenue data (Orders + Subscriptions)
+  const monthlyRevenue = Object.keys({
+    ...data.orders.revenueByMonth,
+    ...data.subscriptions.revenueByMonth,
+  }).map((month) => ({
+    month,
+    orders: data.orders.revenueByMonth[month] || 0,
+    subscriptions: data.subscriptions.revenueByMonth[month] || 0,
+  }))
+
+  // Top products data
+  const topProducts = Object.entries(data.orders.topProducts || {}).map(
+    ([name, count]) => ({ name, count })
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {session?.user?.name}! Here's what's happening at your gym today.
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 p-6">
+      {/* USERS */}
+      <Card className="hover:shadow-lg transition-all duration-200 border-t-4 border-blue-500">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Users</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <p>Total: <span className="font-semibold">{data.users.total}</span></p>
+          <p className="text-green-600">Active: {data.users.active}</p>
+          <p className="text-red-600">Blocked: {data.users.blocked}</p>
+          <div className="mt-2 text-xs text-gray-500">
+            <p>Today: {data.users.newUsers.today}</p>
+            <p>Last 7d: {data.users.newUsers.last7Days}</p>
+            <p>Last 30d: {data.users.newUsers.last30Days}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* PRODUCTS */}
+      <Card className="hover:shadow-lg transition-all duration-200 border-t-4 border-green-500">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Products</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-2 text-sm">Total: <span className="font-semibold">{data.products.total}</span></p>
+          <p className="mb-4 text-sm">Stock: {data.products.stock}</p>
+          <ResponsiveContainer width="100%" height={160}>
+            <PieChart>
+              <Pie
+                data={Object.entries(data.products.byCategory).map(([name, value]) => ({ name, value }))}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={65}
+                label
+              >
+                {COLORS.map((color, idx) => (
+                  <Cell key={idx} fill={color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* ORDERS */}
+      <Card className="hover:shadow-lg transition-all duration-200 border-t-4 border-yellow-500">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Orders</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <p>Total: {data.orders.total}</p>
+          <p>Revenue: <span className="font-semibold text-green-600">₹{data.orders.revenue}</span></p>
+          <p>Avg Order: ₹{Math.round(data.orders.avgOrderValue)}</p>
+        </CardContent>
+      </Card>
+
+      {/* SUBSCRIPTIONS */}
+      <Card className="hover:shadow-lg transition-all duration-200 border-t-4 border-purple-500">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Subscriptions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <p>Total: {data.subscriptions.total}</p>
+          <p className="text-green-600">Active: {data.subscriptions.active}</p>
+          <p className="text-red-600">Expired: {data.subscriptions.expired}</p>
+          <p>Revenue: <span className="font-semibold text-green-600">₹{data.subscriptions.revenue}</span></p>
+        </CardContent>
+      </Card>
+
+      {/* COMBINED REVENUE */}
+      <Card className="hover:shadow-lg transition-all duration-200 border-t-4 border-indigo-500 col-span-1 md:col-span-2 xl:col-span-4">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Total Revenue</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold text-green-700">
+            ₹{data.totals.combinedRevenue}
           </p>
-        </div>
-        <Badge variant="secondary" className="bg-primary/10 text-primary">
-          {userRole === "admin" ? "Administrator" : "Staff Member"}
-        </Badge>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-primary">{stat.change}</span> from last month
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Quick Actions */}
-        <Card>
+      {/* CHARTS SECTION */}
+      <div className="col-span-1 md:col-span-2 xl:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Monthly Revenue Trends */}
+        <Card className="hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Quick Actions
-            </CardTitle>
-            <CardDescription>Common tasks and shortcuts</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
-              <a href="/dashboard/products">
-                <Package className="mr-2 h-4 w-4" />
-                Add New Product
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
-              <a href="/dashboard/users">
-                <Users className="mr-2 h-4 w-4" />
-                Manage Members
-              </a>
-            </Button>
-            <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
-              <a href="/dashboard/orders">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                View Orders
-              </a>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              Recent Activity
-            </CardTitle>
-            <CardDescription>Latest updates and actions</CardDescription>
+            <CardTitle className="text-lg font-semibold">Revenue Trends</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.user} • {activity.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={monthlyRevenue}>
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="orders" stroke="#60a5fa" strokeWidth={2} />
+                <Line type="monotone" dataKey="subscriptions" stroke="#4ade80" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Gym Status */}
-        <Card>
+        {/* Top Products */}
+        <Card className="hover:shadow-lg transition-all duration-200">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Dumbbell className="h-5 w-5 text-primary" />
-              Gym Status
-            </CardTitle>
-            <CardDescription>Current facility information</CardDescription>
+            <CardTitle className="text-lg font-semibold">Top Products</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Current Capacity</span>
-              <Badge variant="secondary">78/120</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Equipment Status</span>
-              <Badge className="bg-green-100 text-green-800">All Operational</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Staff on Duty</span>
-              <Badge variant="outline">5 Active</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Next Maintenance</span>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Calendar className="h-3 w-3" />
-                Tomorrow
-              </div>
-            </div>
+          <CardContent>
+            {topProducts.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={topProducts}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#facc15" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-gray-500">No product sales data</p>
+            )}
           </CardContent>
         </Card>
       </div>
