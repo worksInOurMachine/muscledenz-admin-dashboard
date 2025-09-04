@@ -86,7 +86,7 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
     filters: { publishedAt: { $notNull: true } },
   });
 
-  const user: any = data?.[0] || [];
+  const user: any = (data as any)?.[0] || [];
   const plans: any = plansData?.data || [];
 
   // --------- HANDLERS ----------

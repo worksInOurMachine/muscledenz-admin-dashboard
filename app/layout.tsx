@@ -1,14 +1,15 @@
-"use client"
-
 import type React from "react"
 
 // import { useSession } from "next-auth/react"
 // import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import {  SidebarInset } from "@/components/ui/sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { SessionProvider } from "next-auth/react"
 import "@/styles/globals.css"
+import SideBarProvider from "@/components/providers/SideBarProvider"
+import AuthProvider from "@/components/providers/AuthProvider"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export default function DashboardLayout({
   children,
@@ -25,10 +26,12 @@ export default function DashboardLayout({
   //   redirect("/auth/signin")
   // }
 
+  const session = getServerSession(authOptions)
+
   return (
     
-    <SessionProvider>
-    <SidebarProvider>
+    <AuthProvider>
+    <SideBarProvider>
       <AppSidebar />
       <SidebarInset>
         <DashboardHeader />
@@ -40,7 +43,7 @@ export default function DashboardLayout({
 
         </html>
       </SidebarInset>
-    </SidebarProvider>
-    </SessionProvider>
+    </SideBarProvider>
+    </AuthProvider>
   )
 }

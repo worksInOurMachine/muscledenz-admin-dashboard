@@ -16,7 +16,6 @@ export default function DashboardLayout({
       <AppSidebar />
       <SidebarInset>
         <DashboardHeader />
-        <Toaster position="top-center"/>
         <div className="flex flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>

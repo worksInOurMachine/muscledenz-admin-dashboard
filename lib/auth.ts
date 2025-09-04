@@ -1,70 +1,72 @@
-import type { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import { strapi as api } from "./strapiSDK/strapi";
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: "OTP Login",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        phone: { label: "Phone", type: "text" },
+        otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials) {
-        // In a real app, you'd validate against your database
-        // For demo purposes, we'll use hardcoded users
-        const users = [
-          {
-            id: "1",
-            email: "admin@gym.com",
-            password: "admin123",
-            name: "Admin User",
-            role: "admin",
-          },
-          {
-            id: "2",
-            email: "staff@gym.com",
-            password: "staff123",
-            name: "Staff User",
-            role: "staff",
-          },
-        ]
+        try {
+          if (!credentials?.phone || !credentials?.otp) return null;
 
-        const user = users.find((u) => u.email === credentials?.email && u.password === credentials?.password)
+          const res = await api.axios.post(`/otp/verify`, {
+            phone: credentials.phone,
+            otp: credentials.otp,
+          });
 
-        if (user) {
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
+          const data = res.data;
+
+          console.log("OTP login response:", data);
+
+          if (data?.jwt && data?.user) {
+            return {
+              id: String(data.user.id),
+              phone: data.user.phone,
+              jwt: data.jwt,
+              type: data.user.type,
+              name: `${data.user.firstname} ${data.user.lastname}`
+            };
           }
+
+          return null;
+        } catch (err: any) {
+          console.error("OTP login failed", err.response?.data?.error?.message || err.message);
+          throw new Error(err.response?.data?.error?.message || "Login failed");
         }
-        return null
       },
     }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role
+        token.jwt = (user as any).jwt;
+        token.phone = (user as any).phone;
+        token.type = (user as any).type;
+        token.name = (user as any).name
       }
-      return token
+      return token;
     },
-    async session({ session, token }) {
-      if (session.user) {
-        ;(session.user as any).role = token.role
-      }
-      return session
+    async session({ session, token }:any) {
+      session.user = {
+        id: token.sub as string,
+        phone: token.phone as string,
+        type: token.type as string,
+        name: token.name as string
+      };
+      session.jwt = token.jwt as string;
+      return session;
     },
   },
-  pages: {
-    signIn: "/auth/signin",
-  },
+
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
-  ...(process.env.NEXTAUTH_URL && {
-    url: process.env.NEXTAUTH_URL,
-  }),
-}
+
+  secret: process.env.NEXTAUTH_SECRET || 'sJKHDAGS56787E3DIU#$%^&*',
+};

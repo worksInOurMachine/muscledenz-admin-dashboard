@@ -1,45 +1,90 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Dumbbell } from "lucide-react"
-
+import { strapi } from "@/lib/strapiSDK/strapi"
+import { signIn } from "next-auth/react"
+import { toast } from "sonner"
 export default function SignIn() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [phone, setPhone] = useState("")
+  const [otp, setOtp] = useState("")
+  const [step, setStep] = useState<"phone" | "otp">("phone")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+    
+
+    try {
+
+
+      const getUserType = await strapi.axios.get(`/users?filters[phone][$eq]=${phone}`)
+      const user = getUserType.data[0] || null 
+
+      if (!user){
+        setError(`No User Found With ${phone}`)
+        return
+      }
+
+      if (user && user.type !== 'admin'){
+        setError("Only Admin's Can Login!")
+        return
+      }
+
+
+      const res = await strapi.axios.post("/otp/send", { phone })
+      if (res.data.success) {
+        setStep("otp")
+      } else {
+        setError("Failed to send OTP")
+      }
+      toast.success("OTP sent successfully")
+    } catch (err:any) {
+      setError("Error sending OTP")
+      console.log('error',err?.response?.data?.error?.message || 'something went wrong!')
+      toast.error(err?.response?.data?.error?.message || 'something went wrong!')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
+     
+      const signInRes = await signIn("credentials", {
         redirect: false,
+        phone,
+        otp,
       })
+      
+      console.log("Sign in response:", signInRes)
 
-      if (result?.error) {
-        setError("Invalid credentials")
-      } else {
-        const session = await getSession()
-        if (session?.user) {
-          router.push("/dashboard")
-        }
+      if (signInRes?.error) {
+        setError(signInRes?.error)
+        toast.error(signInRes?.error || 'something went wrong!')
+        console.log("Sign in error:", signInRes.error)
+        return
       }
-    } catch (error) {
-      setError("An error occurred")
+
+      toast.success("Welcome To Dashboard!")
+      router.refresh()
+    } catch (err) {
+      setError("Error verifying OTP")
+      toast.error('Something Went Wrong Try Again!')
     } finally {
       setLoading(false)
     }
@@ -53,42 +98,48 @@ export default function SignIn() {
             <Dumbbell className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">Gym Admin</CardTitle>
-          <CardDescription>Sign in to access the dashboard</CardDescription>
+          <CardDescription>
+            {step === "phone" ? "Sign in with your phone number" : "Enter the OTP sent to your phone"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@gym.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-            {error && <div className="text-destructive text-sm">{error}</div>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-          <div className="mt-4 text-sm text-muted-foreground">
-            <p>Demo credentials:</p>
-            <p>Admin: admin@gym.com / admin123</p>
-            <p>Staff: staff@gym.com / staff123</p>
-          </div>
+          {step === "phone" ? (
+            <form onSubmit={handleSendOtp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 9876543210"
+                  required
+                />
+              </div>
+              {error && <div className="text-destructive text-sm">{error}</div>}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Sending..." : "Send OTP"}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">OTP</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  required
+                />
+              </div>
+              {error && <div className="text-destructive text-sm">{error}</div>}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Verifying..." : "Verify OTP"}
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
