@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Delete, Edit } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PlansPage() {
   const { data: plansData, isLoading, mutate } = useStrapi("gym-plans", {
@@ -50,6 +51,12 @@ export default function PlansPage() {
   };
 
   const handleSave = async () => {
+
+    if (!form.title || !form.duration || !form.price){
+        toast.error('All fields are required!')
+        return
+    }
+
     if (editingPlan) {
       await strapi.update("gym-plans", editingPlan.documentId, form);
     } else {
@@ -122,6 +129,7 @@ export default function PlansPage() {
             <Input
               placeholder="Title"
               name="title"
+              required
               value={form.title}
               onChange={handleChange}
             />
@@ -129,12 +137,14 @@ export default function PlansPage() {
               type="number"
               placeholder="Duration (months)"
               name="duration"
+              required
               value={form.duration}
               onChange={handleChange}
             />
             <Input
               type="number"
               placeholder="Price"
+              required
               name="price"
               value={form.price}
               onChange={handleChange}
@@ -144,7 +154,7 @@ export default function PlansPage() {
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>
+            <Button type="submit" onClick={handleSave}>
               {editingPlan ? "Update" : "Create"}
             </Button>
           </DialogFooter>
