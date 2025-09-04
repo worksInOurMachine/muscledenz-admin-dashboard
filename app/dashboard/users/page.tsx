@@ -26,6 +26,7 @@ import { copyToClipboard } from "@/lib/copyToClipboard"
 import { strapi } from "@/lib/strapiSDK/strapi"
 import { usePagination } from "@/lib/pagination/usePagination"
 import { Pagination } from "@/lib/pagination/Pagination"
+import { formatDate } from "@/lib/formatDate"
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -142,7 +143,7 @@ useEffect(() => {
               <TableHead className="text-gray-300">Is Member{'(Gym)'}</TableHead>
               <TableHead className="text-gray-300">Type</TableHead>
               {/* <TableHead className="text-gray-300">Orders</TableHead> */}
-              <TableHead className="text-gray-300">Created At</TableHead>
+              <TableHead className="text-gray-300">Joined On</TableHead>
               <TableHead className="text-gray-300 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -194,7 +195,7 @@ useEffect(() => {
                   {/* <TableCell>{getStatusBadge(user.status)}</TableCell> */}
                   {/* <TableCell className="text-gray-300">{user.membershipType || "N/A"}</TableCell> */}
                   {/* <TableCell className="text-gray-300">{user.totalOrders || 0}</TableCell> */}
-                  <TableCell className="text-gray-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{formatDate(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

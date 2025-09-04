@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -20,6 +27,8 @@ import { ordersApi } from "@/lib/api/orders";
 import { useStrapi } from "@/lib/strapiSDK/useStrapi";
 import { calculateDiscount } from "@/lib/calculateDiscount";
 import { renderImage } from "@/lib/renderImage";
+import { useRouter } from "next/navigation";
+import { formatDate } from "@/lib/formatDate";
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -27,6 +36,7 @@ interface OrderDetailPageProps {
 
 export default function OrderDetailPage({ params }: OrderDetailPageProps) {
   const { id } = use(params);
+  const router = useRouter();
   const { data, error, isLoading } = useStrapi("orders", {
     populate: [
       "user",
@@ -34,6 +44,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
       "user.profile",
       "product.thumbnail",
       "address",
+      "document",
     ],
     filters: { documentId: id },
   });
@@ -297,6 +308,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                       <CreditCard className="h-4 w-4" />
                       <span>{order.paymentMethod}</span>
                     </div>
+                    <Button onClick={() => router.push(`/dashboard/users/${order.user.documentId}`)}>View Customer Profile</Button>
                   </div>
                 </div>
               </div>
@@ -318,6 +330,36 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                 <span className="text-gray-400">Payment Status</span>
                 {getPaymentBadge(order.paymentStatus)}
               </div>
+              {order.document && order.document.length > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Payment Proof</span>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <img
+                        src={renderImage(order.document[0].url)}
+                        alt="Payment Proof"
+                        className="h-12 w-12 rounded-lg border border-gray-700 cursor-pointer hover:opacity-80 transition"
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-white">
+                          Payment Proof
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex justify-center">
+                        <img
+                          src={renderImage(order.document[0].url)}
+                          alt="Payment Proof"
+                          className="max-h-[80vh] rounded-lg shadow-lg"
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+
               {order.trackingNumber && (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Tracking</span>
@@ -329,13 +371,13 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Order Date</span>
                 <span className="text-white">
-                  {new Date(order.createdAt).toLocaleDateString()}
+                  {formatDate(order.createdAt)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Last Updated</span>
                 <span className="text-white">
-                  {new Date(order.updatedAt).toLocaleDateString()}
+                  {formatDate(order.updatedAt)}
                 </span>
               </div>
             </CardContent>
@@ -348,7 +390,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Subtotal</span>
-                <span className="text-white">₹{order.amount.toFixed(2)}</span>
+                <span className="text-gray-400">₹{order.amount.toFixed(2)}</span>
               </div>
               {/* <div className="flex justify-between items-center">
                 <span className="text-gray-400">Tax</span>
@@ -363,7 +405,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                   <span className="text-lg font-semibold text-white">
                     Total
                   </span>
-                  <span className="text-lg font-semibold text-neon-green">
+                  <span className="text-lg font-semibold text-white">
                     ₹{order.amount.toFixed(2)}
                   </span>
                 </div>

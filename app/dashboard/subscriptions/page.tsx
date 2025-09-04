@@ -28,6 +28,7 @@ import {
 import { usePagination } from "@/lib/pagination/usePagination";
 import { Pagination } from "@/lib/pagination/Pagination";
 import Link from "next/link";
+import { formatDate } from "@/lib/formatDate";
 
 function Page() {
   const [search, setSearch] = useState("");
@@ -161,8 +162,8 @@ function Page() {
                       </Button>
                     </TableCell>
                     <TableCell>{sub.plan?.title}</TableCell>
-                    <TableCell>{sub.startDate}</TableCell>
-                    <TableCell>{sub.endDate}</TableCell>
+                    <TableCell>{formatDate(sub.startDate)}</TableCell>
+                    <TableCell>{formatDate(sub.endDate)}</TableCell>
                     <TableCell>₹{paid}</TableCell>
                     <TableCell>₹{pending}</TableCell>
                     <TableCell>
@@ -267,7 +268,7 @@ function Page() {
             <TableBody>
               {selectedInvoices.map((inv: any) => (
                 <TableRow key={inv.id}>
-                  <TableCell>{inv.paymentDate}</TableCell>
+                  <TableCell>{formatDate(inv.paymentDate)}</TableCell>
                   <TableCell>₹{inv.amount}</TableCell>
                 </TableRow>
               ))}

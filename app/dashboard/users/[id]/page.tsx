@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/formatDate";
 
 interface UserDetailPageProps {
   params: Promise<{ id: string }>;
@@ -307,6 +308,9 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                     <PhoneIcon className="h-5" /> {user.phone}
                   </p>
                 )}
+                <p className="text-gray-300 flex justify-center items-center gap-1">
+                    JoinedOn :{' '} {formatDate(user.createdAt)}
+                  </p>
               </div>
             </CardContent>
           </Card>
@@ -415,8 +419,8 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                                 {sub.plan?.title}
                               </td>
                               <td className="p-3 text-gray-300">
-                                {new Date(sub.startDate).toLocaleDateString()} →{" "}
-                                {new Date(sub.endDate).toLocaleDateString()}
+                                {formatDate(sub.startDate)} →{" "}
+                                {formatDate(sub.endDate)}
                               </td>
                               <td className="p-3">
                                 {sub.expired ? (
@@ -470,9 +474,9 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                                           className="flex justify-between border-b border-gray-700 py-2 text-sm"
                                         >
                                           <span>
-                                            {new Date(
+                                            {formatDate(
                                               inv.paymentDate
-                                            ).toLocaleDateString()}
+                                            )}
                                           </span>
                                           <span className="font-medium">
                                             ₹{inv.amount}

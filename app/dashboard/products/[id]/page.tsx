@@ -11,6 +11,7 @@ import { getProduct } from "@/lib/api/products"
 import { ArrowLeft, Edit, Package, DollarSign, Calendar, IndianRupee } from "lucide-react"
 import { useStrapi } from "@/lib/strapiSDK/useStrapi"
 import { renderImage } from "@/lib/renderImage"
+import { formatDate } from "@/lib/formatDate"
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
@@ -157,12 +158,12 @@ export default function ProductPage({ params }: ProductPageProps) {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Created:</span>
-                <span className="text-muted-foreground">{new Date(product.createdAt).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">{formatDate(product.createdAt)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Last Updated:</span>
-                <span className="text-muted-foreground">{new Date(product.updatedAt).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">{formatDate(product.updatedAt)}</span>
               </div>
             </CardContent>
           </Card>

@@ -1,18 +1,31 @@
 "use client"
 
-import { use, useState, useEffect } from "react"
+import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Upload, X } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { ArrowLeft, X } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
 import { useStrapi } from "@/lib/strapiSDK/useStrapi"
 import { strapi } from "@/lib/strapiSDK/strapi"
+import { useForm, Controller } from "react-hook-form"
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>
@@ -22,46 +35,54 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   const { id } = use(params)
   const router = useRouter()
 
-  // fetch product
+  // Fetch product
   const { data, error, isLoading }: any = useStrapi("products", {
-    populate: ["images", "category"],
+    populate: ["images", "category", "thumbnail"],
     filters: { documentId: id },
   })
   const product = data?.data?.[0] || null
 
-  console.log(product)
-
-  // fetch categories dynamically
+  // Fetch categories
   const { data: catData }: any = useStrapi("categories", {})
   const categories = catData?.data || []
 
   const [loading, setLoading] = useState(false)
-  const [existingImages, setExistingImages] = useState<any[]>([]) // strapi image objects
-  const [newImages, setNewImages] = useState<File[]>([]) // new files user adds
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-    category: "",
-    discount:''
-    // status: "active" as "active" | "inactive",
+  const [existingImages, setExistingImages] = useState<any[]>([])
+  const [newImages, setNewImages] = useState<File[]>([])
+  const [existingThumbnail, setExistingThumbnail] = useState<any | null>(null)
+  const [newThumbnail, setNewThumbnail] = useState<File | null>(null)
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      stock: "",
+      discount: "",
+      category: "",
+    },
   })
 
   useEffect(() => {
     if (product) {
-      setFormData({
-        name: product.name || "",
-        description: product.description || "",
-        price: product.price?.toString() || "",
-        stock: product.stock?.toString() || "",
-        category: product.category?.id?.toString() || "",
-        // status: product.status || "active",
-        discount:product.discount
+      reset({
+        name: product.name ?? "",
+        description: product.description ?? "",
+        price: product.price ? String(product.price) : "",
+        stock: product.stock ? String(product.stock) : "",
+        discount: product.discount ? String(product.discount) : "",
+        category: product.category?.id ? String(product.category.id) : "",
       })
-      setExistingImages(product.images || []) // full objects
+      setExistingImages(product.images ?? [])
+      setExistingThumbnail(product.thumbnail ?? null)
     }
-  }, [product])
+  }, [product, reset])
 
   const handleImageRemove = (index: number, isNew: boolean) => {
     if (isNew) {
@@ -77,44 +98,78 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewThumbnail(e.target.files[0])
+    }
+  }
 
+  const removeThumbnail = () => {
+    setExistingThumbnail(null)
+    setNewThumbnail(null)
+  }
+
+  const onSubmit = async (formData: any) => {
+    // ✅ Extra validation for images & thumbnail
+    if (!existingThumbnail && !newThumbnail) {
+      toast.error("Thumbnail is required")
+      return
+    }
+
+    if (existingImages.length + newImages.length === 0) {
+      toast.error("At least one product image is required")
+      return
+    }
+
+    setLoading(true)
     try {
       let uploadedImageIds: number[] = []
+      let uploadedThumbnailId: number | null = null
+
+      // Upload new images
       if (newImages.length > 0) {
         const uploads = await Promise.all(
           newImages.map(async (file) => {
-            const formData = new FormData()
-            formData.append("files", file)
-            const res = await strapi.axios.post('/upload',formData,{
-              headers:{
-            "Content-Type": "multipart/form-data",
-          }
+            const fd = new FormData()
+            fd.append("files", file)
+            const res = await strapi.axios.post("/upload", fd, {
+              headers: { "Content-Type": "multipart/form-data" },
             })
             return res.data
           })
         )
-
         uploadedImageIds = uploads.flat().map((img: any) => img.id) || []
+      }
 
+      // Upload thumbnail if changed
+      if (newThumbnail) {
+        const fd = new FormData()
+        fd.append("files", newThumbnail)
+        const res = await strapi.axios.post("/upload", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        uploadedThumbnailId = res.data?.[0]?.id ?? null
       }
 
       const finalImageIds = [
-        ...existingImages.map((img: any) => img.id), 
+        ...existingImages.map((img: any) => img.id),
         ...uploadedImageIds,
       ]
 
-      await strapi.update("products",id, {
-          name: formData.name,
-          description: formData.description,
-          price: Number.parseFloat(formData.price),
-          stock: Number.parseInt(formData.stock),
-          category: formData.category ? parseInt(formData.category) : null,
-          // status: formData.status,
-          discount:Number(formData.discount),
-          images: finalImageIds,
+      const finalThumbnailId =
+        uploadedThumbnailId !== null
+          ? uploadedThumbnailId
+          : existingThumbnail?.id ?? null
+
+      await strapi.update("products", id, {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock, 10),
+        discount: Number(formData.discount),
+        category: formData.category ? parseInt(formData.category, 10) : null,
+        images: finalImageIds,
+        thumbnail: finalThumbnailId,
       })
 
       toast.success("✅ Product updated successfully")
@@ -158,79 +213,150 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         </div>
       </div>
 
-      <form key={product.id} onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Main Form */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Product Information</CardTitle>
-                <CardDescription>Update basic details about your product</CardDescription>
+                <CardDescription>
+                  Update basic details about your product
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Product Name</Label>
+                  <Label htmlFor="name">Product Name *</Label>
                   <Input
                     id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
+                    {...register("name", { required: "Name is required" })}
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-sm">{errors.name.message}</p>
+                  )}
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description *</Label>
                   <Textarea
                     id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
-                    required
+                    {...register("description", {
+                      required: "Description is required",
+                    })}
                   />
+                  {errors.description && (
+                    <p className="text-red-500 text-sm">
+                      {errors.description.message}
+                    </p>
+                  )}
                 </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price (₹)</Label>
+                    <Label htmlFor="price">Price (₹) *</Label>
                     <Input
                       id="price"
                       type="number"
                       step="0.01"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      required
+                      {...register("price", { required: "Price is required" })}
                     />
+                    {errors.price && (
+                      <p className="text-red-500 text-sm">{errors.price.message}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="stock">Stock Quantity</Label>
+                    <Label htmlFor="stock">Stock Quantity *</Label>
                     <Input
                       id="stock"
                       type="number"
-                      value={formData.stock}
-                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                      required
+                      {...register("stock", { required: "Stock is required" })}
                     />
+                    {errors.stock && (
+                      <p className="text-red-500 text-sm">{errors.stock.message}</p>
+                    )}
                   </div>
-                   <div className="space-y-2">
-                    <Label htmlFor="stock">Discount(%)</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="discount">Discount (%) *</Label>
                     <Input
-                      id="stock"
+                      id="discount"
                       type="number"
-                      value={formData.discount}
-                      onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-                      required
+                      {...register("discount", {
+                        required: "Discount is required",
+                      })}
                     />
+                    {errors.discount && (
+                      <p className="text-red-500 text-sm">{errors.discount.message}</p>
+                    )}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Product Thumbnail */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Thumbnail *</CardTitle>
+                <CardDescription>
+                  Upload a single thumbnail image for your product
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {existingThumbnail && !newThumbnail && (
+                  <div className="relative group w-40">
+                    <img
+                      src={existingThumbnail.url || "/placeholder.svg"}
+                      alt="Thumbnail"
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={removeThumbnail}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+
+                {newThumbnail && (
+                  <div className="relative group w-40">
+                    <img
+                      src={URL.createObjectURL(newThumbnail)}
+                      alt="New Thumbnail"
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={removeThumbnail}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailSelect}
+                />
               </CardContent>
             </Card>
 
             {/* Product Images */}
             <Card>
               <CardHeader>
-                <CardTitle>Product Images</CardTitle>
-                <CardDescription>Update images to showcase your product</CardDescription>
+                <CardTitle>Product Images *</CardTitle>
+                <CardDescription>
+                  Upload multiple images to showcase your product
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Existing images */}
                 {existingImages.length > 0 && (
                   <div className="grid gap-4 md:grid-cols-3">
                     {existingImages.map((image, index) => (
@@ -254,7 +380,6 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                   </div>
                 )}
 
-                {/* New images preview */}
                 {newImages.length > 0 && (
                   <div className="grid gap-4 md:grid-cols-3">
                     {newImages.map((file, index) => (
@@ -278,8 +403,12 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                   </div>
                 )}
 
-                {/* File input */}
-                <Input type="file" multiple accept="image/*" onChange={handleNewImageSelect} />
+                <Input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleNewImageSelect}
+                />
               </CardContent>
             </Card>
           </div>
@@ -293,52 +422,50 @@ export default function EditProductPage({ params }: EditProductPageProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category: any) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="category">Category *</Label>
+                  <Controller
+                    name="category"
+                    control={control}
+                    rules={{ required: "Category is required" }}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category: any) => (
+                            <SelectItem
+                              key={category.id}
+                              value={category.id.toString()}
+                            >
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.category && (
+                    <p className="text-red-500 text-sm">
+                      {errors.category.message}
+                    </p>
+                  )}
                 </div>
-                {/* <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value: "active" | "inactive") =>
-                      setFormData({ ...formData, status: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div> */}
               </CardContent>
             </Card>
 
-            {/* Actions */}
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-2">
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Updating..." : "Update Product"}
                   </Button>
-                  <Button type="button" variant="outline" className="w-full bg-transparent" asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-transparent"
+                    asChild
+                  >
                     <Link href={`/dashboard/products/${id}`}>Cancel</Link>
                   </Button>
                 </div>

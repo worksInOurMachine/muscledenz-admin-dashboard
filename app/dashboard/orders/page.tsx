@@ -57,6 +57,7 @@ import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { usePagination } from "@/lib/pagination/usePagination";
 import { Pagination } from "@/lib/pagination/Pagination";
+import { formatDate } from "@/lib/formatDate";
 
 export default function OrdersPage() {
   const params = useSearchParams();
@@ -72,7 +73,6 @@ export default function OrdersPage() {
   useEffect(() => {
     if (searchTerm || statusFilter !== 'all' || paymentFilter !== 'all'){
         setPage(1)
-        console.log('hii')
     }
   },[searchTerm,statusFilter,paymentFilter])
 
@@ -383,7 +383,7 @@ export default function OrdersPage() {
                     ₹{order.amount.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-gray-300">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {formatDate(order.createdAt)}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
