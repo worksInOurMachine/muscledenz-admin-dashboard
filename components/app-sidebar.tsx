@@ -33,6 +33,7 @@ import {
   Layers,
   Receipt,
 } from "lucide-react"
+import Image from "next/image"
 
 const navigationItems = [
   {
@@ -69,11 +70,11 @@ const navigationItems = [
     url: "/dashboard/plans",
     icon: Layers,
   },
-  {
-    title: "Analytics",
-    url: "/dashboard/analytics",
-    icon: BarChart3,
-  },
+  // {
+  //   title: "Analytics",
+  //   url: "/dashboard/analytics",
+  //   icon: BarChart3,
+  // },
 ]
 
 export function AppSidebar() {
@@ -84,12 +85,12 @@ export function AppSidebar() {
     <Sidebar variant="inset">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Dumbbell className="size-4" />
+          <div className="flex object-cover aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Image className="object-cover" src={'/muscleDenzLogo.png'} alt="MuscleDenz Logo" width={40} height={40}/>
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Gym Admin</span>
-            <span className="truncate text-xs text-muted-foreground">Fitness Management</span>
+            <span className="truncate font-semibold">MuscleDenz</span>
+            <span className="truncate text-xs text-muted-foreground">Fitness and Gym Management</span>
           </div>
         </div>
       </SidebarHeader>
@@ -112,7 +113,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarSeparator />
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -126,7 +127,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup> */}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -158,12 +159,12 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                   <Link href="/dashboard/settings">
                     <Settings />
                     Settings
                   </Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/auth/signin" })}>
                   <LogOut />
                   Log out

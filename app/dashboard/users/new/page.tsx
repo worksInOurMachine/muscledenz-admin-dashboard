@@ -274,7 +274,7 @@ export default function NewUserPage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-neon-green hover:bg-neon-green/80 text-black"
+                  className="w-full bg-neon-green hover:bg-neon-green/80 "
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {isLoading ? "Creating..." : "Create User"}
@@ -283,7 +283,7 @@ export default function NewUserPage() {
                   type="button"
                   variant="outline"
                   onClick={() => router.back()}
-                  className="w-full border-gray-600 text-gray-300 hover:text-white"
+                  className="w-full border-gray-600  "
                 >
                   Cancel
                 </Button>

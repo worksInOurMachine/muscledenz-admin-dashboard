@@ -210,12 +210,12 @@ useEffect(() => {
                             View Details
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
+                        {/* <DropdownMenuItem asChild>
                           <Link href={`/dashboard/users/${user.documentId}/edit`} className="text-gray-300 hover:text-white">
                             <Edit className="h-4 w-4 mr-2" />
                             Edit User
                           </Link>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuSeparator className="bg-gray-700" />
                         {/* {user.status === "active" ? (
                           <DropdownMenuItem

@@ -97,7 +97,7 @@ export default function SignIn() {
           <div className="flex justify-center mb-4">
             <Dumbbell className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Gym Admin</CardTitle>
+          <CardTitle className="text-2xl font-bold">MuscleDenz</CardTitle>
           <CardDescription>
             {step === "phone" ? "Sign in with your phone number" : "Enter the OTP sent to your phone"}
           </CardDescription>
