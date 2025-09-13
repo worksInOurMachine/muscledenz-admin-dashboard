@@ -9,12 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Dumbbell } from "lucide-react"
 import { strapi } from "@/lib/strapiSDK/strapi"
-import { signIn } from "next-auth/react"
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+  import { signIn } from "next-auth/react"
 import { toast } from "sonner"
 export default function SignIn() {
-  const [phone, setPhone] = useState("")
+  const [identifier, setidentifier] = useState("")
   const [otp, setOtp] = useState("")
-  const [step, setStep] = useState<"phone" | "otp">("phone")
+  const [step, setStep] = useState<"identifier" | "otp">("identifier")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
@@ -28,11 +29,11 @@ export default function SignIn() {
     try {
 
 
-      const getUserType = await strapi.axios.get(`/users?filters[phone][$eq]=${phone}`)
+      const getUserType = await strapi.axios.get(`/users?filters[identifier][$eq]=${identifier}`)
       const user = getUserType.data[0] || null 
 
       if (!user){
-        setError(`No User Found With ${phone}`)
+        setError(`No User Found With ${identifier}`)
         return
       }
 
@@ -42,7 +43,7 @@ export default function SignIn() {
       }
 
 
-      const res = await strapi.axios.post("/otp/send", { phone })
+      const res = await strapi.axios.post("/otp/send", { identifier })
       if (res.data.success) {
         setStep("otp")
       } else {
@@ -67,7 +68,7 @@ export default function SignIn() {
      
       const signInRes = await signIn("credentials", {
         redirect: false,
-        phone,
+        identifier,
         otp,
       })
       
@@ -98,21 +99,26 @@ export default function SignIn() {
             <Dumbbell className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">MuscleDenz</CardTitle>
+           <DotLottieReact
+      src="/Login.lottie"
+      loop
+      autoplay
+    />
           <CardDescription>
-            {step === "phone" ? "Sign in with your phone number" : "Enter the OTP sent to your phone"}
+            {step === "identifier" ? "Sign in with your identifier number" : "Enter the OTP sent to your identifier"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === "phone" ? (
+          {step === "identifier" ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="identifier">Enter Your Email</Label>
                 <Input
-                  id="phone"
+                  id="identifier"
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 9876543210"
+                  value={identifier}
+                  onChange={(e) => setidentifier(e.target.value)}
+                  placeholder="example@mail.com"
                   required
                 />
               </div>

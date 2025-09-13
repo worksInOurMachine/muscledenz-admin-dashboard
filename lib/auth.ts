@@ -7,15 +7,15 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "OTP Login",
       credentials: {
-        phone: { label: "Phone", type: "text" },
+        identifier: { label: "identifier", type: "text" },
         otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials) {
         try {
-          if (!credentials?.phone || !credentials?.otp) return null;
+          if (!credentials?.identifier || !credentials?.otp) return null;
 
           const res = await api.axios.post(`/otp/verify`, {
-            phone: credentials.phone,
+            identifier: credentials.identifier,
             otp: credentials.otp,
           });
 
@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
           if (data?.jwt && data?.user) {
             return {
               id: String(data.user.id),
-              phone: data.user.phone,
+              identifier: data.user.identifier,
               jwt: data.jwt,
               type: data.user.type,
               name: `${data.user.firstname} ${data.user.lastname}`
@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.jwt = (user as any).jwt;
-        token.phone = (user as any).phone;
+        token.identifier = (user as any).identifier;
         token.type = (user as any).type;
         token.name = (user as any).name
       }
@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }:any) {
       session.user = {
         id: token.sub as string,
-        phone: token.phone as string,
+        identifier: token.identifier as string,
         type: token.type as string,
         name: token.name as string
       };

@@ -63,7 +63,7 @@ export default function NewUserPage() {
       //create user now buoy
 
       const userRes = await strapi.axios.post("/auth/local/register", {
-        username: formData.phone,
+        username: formData.email,
         email: formData.email,
         password: "123123",
       });
@@ -71,6 +71,7 @@ export default function NewUserPage() {
       await strapi.axios.put(`/users/${userRes?.data?.user?.id}`, {
         firstname: formData.firstname,
         lastname: formData.lastname,
+        identifier:formData.email,
         phone: formData.phone,
         type: "customer",
         isGymMember: true,
@@ -86,9 +87,9 @@ export default function NewUserPage() {
       toast.success("User Created SuccessFully!");
 
       router.push("/dashboard/users");
-    } catch (error) {
+    } catch (error:any) {
       console.error("Failed to create user:", error);
-      toast.error("Failed to create user");
+      toast.error(error?.response?.data?.error?.message || "Failed to create user");
     } finally {
       setIsLoading(false);
     }
