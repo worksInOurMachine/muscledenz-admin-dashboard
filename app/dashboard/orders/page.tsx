@@ -358,15 +358,15 @@ export default function OrdersPage() {
                       <Avatar className="h-8 w-8">
                         <AvatarImage
                           src={order.user?.profile?.url || "/placeholder.svg"}
-                          alt={order.user.name}
+                          alt={order?.user?.name}
                         />
                         <AvatarFallback className="bg-gray-700 text-white text-xs">
-                          {order.user.name}
+                          {order.user?.name}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="font-medium text-white text-sm">
-                          {order.user.firstname + " " + order.user.lastname}
+                          {order.user?.firstname + " " + order.user?.lastname}
                         </div>
                         <div className="text-xs text-gray-400">
                           {order.user.email}
