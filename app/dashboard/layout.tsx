@@ -2,8 +2,8 @@
 import type React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { DashboardHeader } from "@/components/dashboard-header"
-import { Toaster } from "sonner"
+// import { DashboardHeader } from "@/components/dashboard-header"
+// import { Toaster } from "sonner"
 
 export default function DashboardLayout({
   children,
@@ -15,7 +15,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <DashboardHeader />
+        {/* <DashboardHeader /> */}
         <div className="flex flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>

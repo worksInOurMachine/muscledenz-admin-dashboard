@@ -416,7 +416,7 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                             >
                               <td className="p-3 text-gray-300">{sub.id}</td>
                               <td className="p-3 text-white font-medium">
-                                {sub.plan?.title}
+                                {sub.plan?.title || 'N/A'}
                               </td>
                               <td className="p-3 text-gray-300">
                                 {formatDate(sub.startDate)} →{" "}

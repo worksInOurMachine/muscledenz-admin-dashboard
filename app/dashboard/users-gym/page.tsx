@@ -71,7 +71,7 @@ export default function UsersPage() {
     ],
     filters: {
       // ...(userFilter === 'gymMembers' && { isGymMember: true }),
-      ...{ isGymMember: false },
+      ...{ isGymMember: true },
       ...(typeFilter !== "all" && { type: typeFilter }),
       ...(searchTerm && {
         $or: [

@@ -57,8 +57,12 @@ const navigationItems = [
     icon: ShoppingCart,
   },
   {
-    title: "Users",
+    title: "Users(muscleDenz)",
     url: "/dashboard/users",
+    icon: Users,
+  }, {
+    title: "Users(Gym)",
+    url: "/dashboard/users-gym",
     icon: Users,
   },{
     title: "Gym Subscriptions",
@@ -100,7 +104,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem  key={item.title}>
                   <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
                     <Link href={item.url}>
                       <item.icon />
