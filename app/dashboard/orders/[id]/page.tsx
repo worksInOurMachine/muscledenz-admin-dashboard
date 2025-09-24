@@ -260,14 +260,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                       {/* Discounted Price */}
                       <TableCell className="text-gray-300 text-center">
                         ₹
-                        {(
-                          (order?.quantity ?? 0) *
-                          calculateDiscount(
-                            order?.product?.price ?? 0,
-                            (order?.product?.discount ?? 0) +
-                              (order?.couponDiscount ?? 0)
-                          )
-                        ).toFixed(2)}
+                       {order.amount}
                       </TableCell>
 
                       {/* Total */}
