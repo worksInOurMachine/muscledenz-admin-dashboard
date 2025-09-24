@@ -197,9 +197,9 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     <TableHead className="text-gray-300">Product</TableHead>
                     <TableHead className="text-gray-300">Quantity</TableHead>
                     <TableHead className="text-gray-300">discount</TableHead>
+                     <TableHead className="text-gray-300">Coupon Discount</TableHead>
                     <TableHead className="text-gray-300">Price</TableHead>
                     <TableHead className="text-gray-300">Final Price</TableHead>
-
                     <TableHead className="text-gray-300 text-right">
                       Total
                     </TableHead>
@@ -243,6 +243,10 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                       {/* Discount */}
                       <TableCell className="text-green-400 text-center font-medium">
                         {order?.product?.discount ?? 0}%
+                      </TableCell>
+                      
+                          <TableCell className="text-green-400 text-center font-medium">
+                        {order?.couponDiscount ?? 0}%
                       </TableCell>
 
                       {/* Price per item */}
