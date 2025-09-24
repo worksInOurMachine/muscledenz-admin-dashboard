@@ -74,6 +74,11 @@ const navigationItems = [
     url: "/dashboard/plans",
     icon: Layers,
   },
+  {
+    title: "Coupons",
+    url: "/dashboard/coupons",
+    icon: SubscriptIcon,
+  },
   // {
   //   title: "Analytics",
   //   url: "/dashboard/analytics",

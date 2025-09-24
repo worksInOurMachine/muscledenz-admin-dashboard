@@ -197,7 +197,9 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     <TableHead className="text-gray-300">Product</TableHead>
                     <TableHead className="text-gray-300">Quantity</TableHead>
                     <TableHead className="text-gray-300">discount</TableHead>
-                     <TableHead className="text-gray-300">Coupon Discount</TableHead>
+                    <TableHead className="text-gray-300">
+                      Coupon Discount
+                    </TableHead>
                     <TableHead className="text-gray-300">Price</TableHead>
                     <TableHead className="text-gray-300">Final Price</TableHead>
                     <TableHead className="text-gray-300 text-right">
@@ -244,8 +246,8 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                       <TableCell className="text-green-400 text-center font-medium">
                         {order?.product?.discount ?? 0}%
                       </TableCell>
-                      
-                          <TableCell className="text-green-400 text-center font-medium">
+
+                      <TableCell className="text-green-400 text-center font-medium">
                         {order?.couponDiscount ?? 0}%
                       </TableCell>
 
@@ -262,7 +264,8 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                           (order?.quantity ?? 0) *
                           calculateDiscount(
                             order?.product?.price ?? 0,
-                            order?.product?.discount ?? 0
+                            (order?.product?.discount ?? 0) +
+                              (order?.couponDiscount ?? 0)
                           )
                         ).toFixed(2)}
                       </TableCell>
@@ -296,23 +299,42 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                 <div className="flex-1 space-y-3">
                   <div>
                     <h3 className="text-lg font-semibold text-white">
-                      {order.user.firstname + " " + order.user.lastname}
+                      {order.user?.firstname + " " + order.user?.lastname}
                     </h3>
                     <p className="text-gray-400">{order.user?.email}</p>
+                    <p className="text-gray-400">{order.user?.phone}</p>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 text-gray-300">
-                      <MapPin className="h-4 w-4" />
-                      <span>
-                        {order?.address?.city},{order.address?.pincode},
-                        {order?.address?.state},{order?.address?.country}
-                      </span>
-                    </div>
+                  <div className="flex gap-2 justify-center items-center text-white">
+                    <span>
+                      <MapPin className="h-4 w-4 inline-block mr-1" />
+                      {[
+                        order?.address?.streetAddress,
+                        order?.address?.locality,
+                        order?.address?.city,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                      {order?.address?.pincode
+                        ? ` - ${order.address.pincode}`
+                        : ""}
+                      {order?.address?.state ? `, ${order.address.state}` : ""}
+                      {order?.address?.country
+                        ? `, ${order.address.country}`
+                        : ""}
+                    </span>
+
                     <div className="flex items-center space-x-2 text-gray-300">
                       <CreditCard className="h-4 w-4" />
                       <span>{order?.paymentMethod}</span>
                     </div>
-                    <Button onClick={() => router.push(`/dashboard/users/${order.user.documentId}`)}>View Customer Profile</Button>
+                    <Button
+                    className="cursor-pointer"
+                      onClick={() =>
+                        router.push(`/dashboard/users/${order.user.documentId}`)
+                      }
+                    >
+                      View Customer Profile
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -394,7 +416,9 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Subtotal</span>
-                <span className="text-gray-400">₹{order.amount.toFixed(2)}</span>
+                <span className="text-gray-400">
+                  ₹{order.amount.toFixed(2)}
+                </span>
               </div>
               {/* <div className="flex justify-between items-center">
                 <span className="text-gray-400">Tax</span>
