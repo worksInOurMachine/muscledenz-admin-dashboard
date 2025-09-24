@@ -2,6 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
+
 interface PaginationProps {
   meta?: { page: number; pageCount: number; pageSize: number };
   page: number;

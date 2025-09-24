@@ -49,6 +49,10 @@ import { usePagination } from "@/lib/pagination/usePagination";
 import { Pagination } from "@/lib/pagination/Pagination";
 import { formatDate } from "@/lib/formatDate";
 
+export const dynamic = "force-dynamic";
+
+
+
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, settypeFilter] = useState<string>("all");

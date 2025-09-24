@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export interface PaginationQuery {
@@ -8,28 +8,31 @@ export interface PaginationQuery {
   pageSize: number;
 }
 
-export function usePagination(defaults: PaginationQuery = { page: 1, pageSize: 25 }) {
-  const searchParams = useSearchParams();
+export function usePagination(
+  defaults: PaginationQuery = { page: 1, pageSize: 25 }
+) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [page, setPage] = useState(defaults.page);
   const [pageSize, setPageSize] = useState(defaults.pageSize);
 
-  // sync with URL params
+  // initialize from URL on first render
   useEffect(() => {
-    const sp = new URLSearchParams(searchParams.toString());
+    const sp = new URLSearchParams(window.location.search);
+
     const newPage = Number(sp.get("page")) || defaults.page;
     const newPageSize = Number(sp.get("pageSize")) || defaults.pageSize;
 
     setPage(newPage);
     setPageSize(newPageSize);
-  }, [searchParams.toString(), defaults.page, defaults.pageSize]);
+  }, [defaults.page, defaults.pageSize]);
 
   const updateURL = (newPage: number, newPageSize: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     params.set("page", String(newPage));
     params.set("pageSize", String(newPageSize));
+
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 

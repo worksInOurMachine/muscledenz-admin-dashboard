@@ -30,6 +30,9 @@ import { Pagination } from "@/lib/pagination/Pagination";
 import Link from "next/link";
 import { formatDate } from "@/lib/formatDate";
 
+export const dynamic = "force-dynamic";
+
+
 function Page() {
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("");

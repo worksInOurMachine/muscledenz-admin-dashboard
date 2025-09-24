@@ -369,10 +369,10 @@ export default function OrdersPage() {
                           {order.user?.firstname + " " + order.user?.lastname}
                         </div>
                         <div className="text-xs text-gray-400">
-                          {order.user.email}
+                          {order.user?.email}
                         </div>
                         <div className="text-xs text-gray-400">
-                          {order.user.phone}
+                          {order.user?.phone}
                         </div>
                       </div>
                     </div>

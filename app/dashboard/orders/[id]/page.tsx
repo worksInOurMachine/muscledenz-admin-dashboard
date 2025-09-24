@@ -282,11 +282,11 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
               <div className="flex items-start space-x-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage
-                    src={order.user.profile.url || "/placeholder.svg"}
-                    alt={order.user.firstname}
+                    src={order.user?.profile?.url || "/placeholder.svg"}
+                    alt={order.user?.firstname}
                   />
                   <AvatarFallback className="bg-gray-700 text-white">
-                    {order.user.firstname + " " + order.user.lastname}
+                    {order.user?.firstname + " " + order.user?.lastname}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-3">
@@ -294,19 +294,19 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     <h3 className="text-lg font-semibold text-white">
                       {order.user.firstname + " " + order.user.lastname}
                     </h3>
-                    <p className="text-gray-400">{order.user.email}</p>
+                    <p className="text-gray-400">{order.user?.email}</p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2 text-gray-300">
                       <MapPin className="h-4 w-4" />
                       <span>
-                        {order?.address?.city},{order.address.pincode},
+                        {order?.address?.city},{order.address?.pincode},
                         {order?.address?.state},{order?.address?.country}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-300">
                       <CreditCard className="h-4 w-4" />
-                      <span>{order.paymentMethod}</span>
+                      <span>{order?.paymentMethod}</span>
                     </div>
                     <Button onClick={() => router.push(`/dashboard/users/${order.user.documentId}`)}>View Customer Profile</Button>
                   </div>
