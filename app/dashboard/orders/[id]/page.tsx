@@ -260,7 +260,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                       {/* Discounted Price */}
                       <TableCell className="text-gray-300 text-center">
                         ₹
-                       {order.amount}
+                       {order?.amount}
                       </TableCell>
 
                       {/* Total */}
