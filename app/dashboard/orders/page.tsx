@@ -67,15 +67,13 @@ export default function OrdersPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
-  const {page,pageSize,setPage} = usePagination()
-
+  const { page, pageSize, setPage } = usePagination();
 
   useEffect(() => {
-    if (searchTerm || statusFilter !== 'all' || paymentFilter !== 'all'){
-        setPage(1)
+    if (searchTerm || statusFilter !== "all" || paymentFilter !== "all") {
+      setPage(1);
     }
-  },[searchTerm,statusFilter,paymentFilter])
-
+  }, [searchTerm, statusFilter, paymentFilter]);
 
   const { data, error, isLoading, mutate } = useStrapi("orders", {
     populate: ["user", "product", "user.profile"],
@@ -94,14 +92,13 @@ export default function OrdersPage() {
         ],
       }),
     },
-    pagination:{
-      page:page,
-      pageSize:pageSize
-    }
+    pagination: {
+      page: page,
+      pageSize: pageSize,
+    },
   });
 
   const orders: any = data?.data || [];
-
 
   const handleStatusChange = async (
     orderId: string,
@@ -500,8 +497,7 @@ export default function OrdersPage() {
           </TableBody>
         </Table>
       </div>
-          <Pagination page={page} setPage={setPage} meta={data?.meta?.pagination}/>
-
+      <Pagination page={page} setPage={setPage} meta={data?.meta?.pagination} />
 
       {/* Payment Proof Modal */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>

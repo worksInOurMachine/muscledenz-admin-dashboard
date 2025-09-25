@@ -240,7 +240,9 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4 md:p-6 lg:p-8">
+      {" "}
+      {/* Added padding for mobile */}
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -251,29 +253,31 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold  leading-tight">
+            <h1 className="text-2xl md:text-3xl font-bold leading-tight">
+              {" "}
+              {/* Adjusted size for mobile */}
               {user?.firstname + " " + user?.lastname}
             </h1>
             <p className=" text-sm">User Details</p>
           </div>
         </div>
         {/* <Link href={`/dashboard/users/${user.documentId}/edit`}>
-          <Button className="bg-neon-green text-black font-semibold hover:opacity-90 transition">
-            <Edit className="h-4 w-4 mr-2" />
-            Edit User
-          </Button>
-        </Link> */}
+					<Button className="bg-neon-green text-black font-semibold hover:opacity-90 transition">
+						<Edit className="h-4 w-4 mr-2" />
+						Edit User
+					</Button>
+				</Link> */}
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Section */}
+        {/* Left Section (Main Content) - Occupies 1 column on mobile, 2 on PC */}
         <div className="lg:col-span-2 space-y-8">
           {/* Profile Card */}
           <Card className="bg-gray-800 border-gray-700 shadow-md rounded-2xl">
             <CardHeader>
               <CardTitle className="text-white">Profile Information</CardTitle>
             </CardHeader>
-            <CardContent className="flex items-start gap-6">
+            {/* ADJUSTED: Added flex-col on mobile and sm:flex-row on small-to-medium screens and up */}
+            <CardContent className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <Avatar className="h-24 w-24 ring-2 ring-gray-700">
                 <AvatarImage
                   src={renderImage(user.profile?.url)}
@@ -281,7 +285,9 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                 />
                 <AvatarFallback>{user.firstname?.[0]}</AvatarFallback>
               </Avatar>
-              <div className="space-y-2 flex flex-col justify-start items-start">
+              <div className="space-y-2 flex flex-col justify-start items-center sm:items-start text-center sm:text-left">
+                {" "}
+                {/* Adjusted text alignment for mobile */}
                 <h3 className="text-xl font-semibold text-white">
                   {user.firstname} {user.lastname}
                 </h3>
@@ -297,7 +303,6 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                   {" "}
                   <IdCard className="h-5" /> {user.documentId}
                 </p>
-
                 <p className="text-gray-300 flex justify-center items-center gap-1">
                   {" "}
                   <MailIcon className="h-5" /> {user.email}
@@ -309,8 +314,8 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                   </p>
                 )}
                 <p className="text-gray-300 flex justify-center items-center gap-1">
-                    JoinedOn :{' '} {formatDate(user.createdAt)}
-                  </p>
+                  JoinedOn : {formatDate(user.createdAt)}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -320,15 +325,21 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
             <Card className="bg-gray-800 border-gray-700 shadow-md rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-white">
-                  <div className="flex items-center justify-between w-full">
-                    <h1>Gym Subscriptions</h1>
-
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-3">
+                    {" "}
+                    {/* Adjusted for flex-col on mobile */}
+                    <h1 className="text-xl font-bold">Gym Subscriptions</h1>
                     <Dialog
                       open={showSubDialog}
                       onOpenChange={setShowSubDialog}
                     >
                       <DialogTrigger asChild>
-                        <Button disabled={!canAddNewSubscription}>
+                        <Button
+                          disabled={!canAddNewSubscription}
+                          className="w-full sm:w-auto"
+                        >
+                          {" "}
+                          {/* Full width on mobile */}
                           Add New Subscription
                         </Button>
                       </DialogTrigger>
@@ -389,7 +400,9 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                   </p>
                 ) : (
                   <div className="overflow-x-auto rounded-lg border border-gray-700">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm min-w-[700px] md:min-w-0">
+                      {" "}
+                      {/* Added min-width for very small screens */}
                       <thead>
                         <tr className="bg-gray-900/50 text-gray-400">
                           <th className="p-3 text-left">Id</th>
@@ -416,7 +429,7 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                             >
                               <td className="p-3 text-gray-300">{sub.id}</td>
                               <td className="p-3 text-white font-medium">
-                                {sub.plan?.title || 'N/A'}
+                                {sub.plan?.title || "N/A"}
                               </td>
                               <td className="p-3 text-gray-300">
                                 {formatDate(sub.startDate)} →{" "}
@@ -462,7 +475,9 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                                         View
                                       </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="space-y-4 max-w-md">
+                                    <DialogContent className="space-y-4 max-w-sm sm:max-w-md">
+                                      {" "}
+                                      {/* Adjusted max-width for mobile */}
                                       <DialogHeader>
                                         <DialogTitle>
                                           Invoices - {sub.plan?.title}
@@ -474,9 +489,7 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                                           className="flex justify-between border-b border-gray-700 py-2 text-sm"
                                         >
                                           <span>
-                                            {formatDate(
-                                              inv.paymentDate
-                                            )}
+                                            {formatDate(inv.paymentDate)}
                                           </span>
                                           <span className="font-medium">
                                             ₹{inv.amount}
@@ -538,7 +551,7 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
           )}
         </div>
 
-        {/* Right Sidebar */}
+        {/* Right Sidebar - Occupies 1 column on all screens, but placed second */}
         <div className="space-y-8">
           <Card className="bg-gray-800 border-gray-700 shadow-md rounded-2xl">
             <CardHeader>
@@ -546,25 +559,30 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               {/* <Link href={`/dashboard/users/${user.documentId}/edit`}>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start hover:bg-gray-600"
-                >
-                  <Edit className="h-4 w-4 mr-2" /> Edit Profile
-                </Button>
-              </Link> */}
+								<Button
+									variant="outline"
+									className="w-full justify-start hover:bg-gray-600"
+								>
+									<Edit className="h-4 w-4 mr-2" /> Edit Profile
+								</Button>
+							</Link> */}
               {/* <Button
-                variant="outline"
-                className="w-full justify-start hover:bg-gray-600"
-              >
-                <Mail className="h-4 w-4 mr-2" /> Send Message
-              </Button> */}
+								variant="outline"
+								className="w-full justify-start hover:bg-gray-600"
+							>
+								<Mail className="h-4 w-4 mr-2" /> Send Message
+							</Button> */}
               <Button
                 variant="outline"
                 className="w-full justify-start hover:bg-gray-200"
               >
-                <Link className="flex justify-center items-center" href={`/dashboard/orders?user=${user.documentId}`}><ShoppingBag className="h-4 w-4 mr-2" /> View Orders </Link>
-              </Button> 
+                <Link
+                  className="flex justify-start items-center w-full" /* Ensure Link fills Button width */
+                  href={`/dashboard/orders?user=${user.documentId}`}
+                >
+                  <ShoppingBag className="h-4 w-4 mr-2" /> View Orders{" "}
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </div>
