@@ -283,6 +283,11 @@ export default function HomePageEditor() {
         // Collect only the IDs of the images to link to the single type entry
         payload.top_banners = data.top_banners.map((img) => img.id);
       } else if (section === "about") {
+        if (data.about_images.length !== 4) {
+          toast.error(
+            "Please upload exactly 4 images for the About section ❌"
+          );
+        }
         payload.about_images = data.about_images.map((img) => img.id);
       } else if (section === "reviews") {
         // Prepare the clean reviews array for the component field
@@ -370,7 +375,7 @@ export default function HomePageEditor() {
       <header className="mb-8 border-b pb-4">
         <h1 className="text-4xl font-extrabold text-blue-600 flex items-center">
           <RefreshCw
-            className="w-6 h-6 mr-3 text-gray-400 cursor-pointer hover:text-blue-500 transition-colors"
+            className="w-6 h-6 mr-3 text-black cursor-pointer hover:text-gray-500 transition-colors"
             onClick={fetchData}
             title="Refresh Data"
           />
