@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useStrapi } from "@/lib/strapiSDK/useStrapi";
 import { strapi } from "@/lib/strapiSDK/strapi";
+import { generateSlug } from "@/lib/generateSlug";
 
 interface EditCategoryPageProps {
   params: Promise<{ id: string }>;
@@ -107,6 +108,7 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
         name: formData.name,
         description: formData.description,
         thumbnail: imageId,
+        slug: generateSlug(formData.name),
       });
 
       toast.success("Category updated successfully");

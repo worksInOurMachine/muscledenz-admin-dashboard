@@ -1,35 +1,35 @@
-"use client"
+"use client";
 
-import { use } from "react"
-import useSWR from "swr"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { getCategory } from "@/lib/api/categories"
-import { ArrowLeft, Edit, Package, Calendar, Hash } from "lucide-react"
-import { useStrapi } from "@/lib/strapiSDK/useStrapi"
+import { use } from "react";
+import useSWR from "swr";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { getCategory } from "@/lib/api/categories";
+import { ArrowLeft, Edit, Package, Calendar, Hash } from "lucide-react";
+import { useStrapi } from "@/lib/strapiSDK/useStrapi";
 
 interface CategoryPageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  const { id } = use(params)
-  const { data, error, isLoading } = useStrapi('categories',{
+  const { id } = use(params);
+  const { data, error, isLoading } = useStrapi("categories", {
     populate: "*",
     filters: { documentId: id },
-  })
+  });
 
-  const category:any = data?.data[0] || null
+  const category: any = data?.data[0] || null;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading category...</div>
       </div>
-    )
+    );
   }
 
   if (error || !category) {
@@ -37,7 +37,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       <div className="flex items-center justify-center h-64">
         <p className="text-destructive">Category not found</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -51,8 +51,12 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{category.name}</h1>
-            <p className="text-muted-foreground">Category details and information</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {category.name}
+            </h1>
+            <p className="text-muted-foreground">
+              Category details and information
+            </p>
           </div>
         </div>
         <Button asChild>
@@ -120,12 +124,16 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Created:</span>
-                <span className="text-muted-foreground">{new Date(category.createdAt).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">
+                  {new Date(category.createdAt).toLocaleDateString()}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-semibold">Last Updated:</span>
-                <span className="text-muted-foreground">{new Date(category.updatedAt).toLocaleDateString()}</span>
+                <span className="text-muted-foreground">
+                  {new Date(category.updatedAt).toLocaleDateString()}
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -136,13 +144,23 @@ export default function CategoryPage({ params }: CategoryPageProps) {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
-                <Link href={`/dashboard/products?category=${category.documentId}`}>
+              <Button
+                variant="outline"
+                className="w-full justify-start bg-transparent"
+                asChild
+              >
+                <Link
+                  href={`/dashboard/products?category=${category.documentId}`}
+                >
                   <Package className="mr-2 h-4 w-4" />
                   View Products in this Category
                 </Link>
               </Button>
-              <Button variant="outline" className="w-full justify-start bg-transparent" asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start bg-transparent"
+                asChild
+              >
                 <Link href="/dashboard/products/new">
                   <Package className="mr-2 h-4 w-4" />
                   Add Product to this Category
@@ -153,5 +171,5 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
