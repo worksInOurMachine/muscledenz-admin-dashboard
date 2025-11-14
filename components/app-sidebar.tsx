@@ -38,10 +38,16 @@ import {
   SubscriptIcon,
   Layers,
   Receipt,
+  HomeIcon,
 } from "lucide-react";
 import Image from "next/image";
 
 const navigationItems = [
+  {
+    title: "Home",
+    url: "/dashboard/home",
+    icon: HomeIcon,
+  },
   {
     title: "Dashboard",
     url: "/dashboard",
