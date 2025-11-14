@@ -1,56 +1,56 @@
-"use client"
+"use client";
 
-import { use, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { ArrowLeft, X } from "lucide-react"
-import { toast } from "sonner"
-import Link from "next/link"
-import { useStrapi } from "@/lib/strapiSDK/useStrapi"
-import { strapi } from "@/lib/strapiSDK/strapi"
-import { useForm, Controller } from "react-hook-form"
+} from "@/components/ui/select";
+import { ArrowLeft, X } from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
+import { useStrapi } from "@/lib/strapiSDK/useStrapi";
+import { strapi } from "@/lib/strapiSDK/strapi";
+import { useForm, Controller } from "react-hook-form";
 
 interface EditProductPageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
 export default function EditProductPage({ params }: EditProductPageProps) {
-  const { id } = use(params)
-  const router = useRouter()
+  const { id } = use(params);
+  const router = useRouter();
 
   // Fetch product
   const { data, error, isLoading }: any = useStrapi("products", {
     populate: ["images", "category", "thumbnail"],
     filters: { documentId: id },
-  })
-  const product = data?.data?.[0] || null
+  });
+  const product = data?.data?.[0] || null;
 
   // Fetch categories
-  const { data: catData }: any = useStrapi("categories", {})
-  const categories = catData?.data || []
+  const { data: catData }: any = useStrapi("categories", {});
+  const categories = catData?.data || [];
 
-  const [loading, setLoading] = useState(false)
-  const [existingImages, setExistingImages] = useState<any[]>([])
-  const [newImages, setNewImages] = useState<File[]>([])
-  const [existingThumbnail, setExistingThumbnail] = useState<any | null>(null)
-  const [newThumbnail, setNewThumbnail] = useState<File | null>(null)
+  const [loading, setLoading] = useState(false);
+  const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [existingThumbnail, setExistingThumbnail] = useState<any | null>(null);
+  const [newThumbnail, setNewThumbnail] = useState<File | null>(null);
 
   const {
     register,
@@ -64,10 +64,11 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       description: "",
       price: "",
       stock: "",
+      collectionType: "",
       discount: "",
       category: "",
     },
-  })
+  });
 
   useEffect(() => {
     if (product) {
@@ -77,89 +78,92 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         price: product.price ? String(product.price) : "",
         stock: product.stock ? String(product.stock) : "",
         discount: product.discount ? String(product.discount) : "",
+        collectionType: product.collectionType
+          ? String(product.collectionType)
+          : "",
         category: product.category?.id ? String(product.category.id) : "",
-      })
-      setExistingImages(product.images ?? [])
-      setExistingThumbnail(product.thumbnail ?? null)
+      });
+      setExistingImages(product.images ?? []);
+      setExistingThumbnail(product.thumbnail ?? null);
     }
-  }, [product, reset])
+  }, [product, reset]);
 
   const handleImageRemove = (index: number, isNew: boolean) => {
     if (isNew) {
-      setNewImages(newImages.filter((_, i) => i !== index))
+      setNewImages(newImages.filter((_, i) => i !== index));
     } else {
-      setExistingImages(existingImages.filter((_, i) => i !== index))
+      setExistingImages(existingImages.filter((_, i) => i !== index));
     }
-  }
+  };
 
   const handleNewImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setNewImages([...newImages, ...Array.from(e.target.files)])
+      setNewImages([...newImages, ...Array.from(e.target.files)]);
     }
-  }
+  };
 
   const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setNewThumbnail(e.target.files[0])
+      setNewThumbnail(e.target.files[0]);
     }
-  }
+  };
 
   const removeThumbnail = () => {
-    setExistingThumbnail(null)
-    setNewThumbnail(null)
-  }
+    setExistingThumbnail(null);
+    setNewThumbnail(null);
+  };
 
   const onSubmit = async (formData: any) => {
     // ✅ Extra validation for images & thumbnail
     if (!existingThumbnail && !newThumbnail) {
-      toast.error("Thumbnail is required")
-      return
+      toast.error("Thumbnail is required");
+      return;
     }
 
     if (existingImages.length + newImages.length === 0) {
-      toast.error("At least one product image is required")
-      return
+      toast.error("At least one product image is required");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      let uploadedImageIds: number[] = []
-      let uploadedThumbnailId: number | null = null
+      let uploadedImageIds: number[] = [];
+      let uploadedThumbnailId: number | null = null;
 
       // Upload new images
       if (newImages.length > 0) {
         const uploads = await Promise.all(
           newImages.map(async (file) => {
-            const fd = new FormData()
-            fd.append("files", file)
+            const fd = new FormData();
+            fd.append("files", file);
             const res = await strapi.axios.post("/upload", fd, {
               headers: { "Content-Type": "multipart/form-data" },
-            })
-            return res.data
+            });
+            return res.data;
           })
-        )
-        uploadedImageIds = uploads.flat().map((img: any) => img.id) || []
+        );
+        uploadedImageIds = uploads.flat().map((img: any) => img.id) || [];
       }
 
       // Upload thumbnail if changed
       if (newThumbnail) {
-        const fd = new FormData()
-        fd.append("files", newThumbnail)
+        const fd = new FormData();
+        fd.append("files", newThumbnail);
         const res = await strapi.axios.post("/upload", fd, {
           headers: { "Content-Type": "multipart/form-data" },
-        })
-        uploadedThumbnailId = res.data?.[0]?.id ?? null
+        });
+        uploadedThumbnailId = res.data?.[0]?.id ?? null;
       }
 
       const finalImageIds = [
         ...existingImages.map((img: any) => img.id),
         ...uploadedImageIds,
-      ]
+      ];
 
       const finalThumbnailId =
         uploadedThumbnailId !== null
           ? uploadedThumbnailId
-          : existingThumbnail?.id ?? null
+          : existingThumbnail?.id ?? null;
 
       await strapi.update("products", id, {
         name: formData.name,
@@ -170,24 +174,25 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         category: formData.category ? parseInt(formData.category, 10) : null,
         images: finalImageIds,
         thumbnail: finalThumbnailId,
-      })
+        collectionType: formData.collectionType || "",
+      });
 
-      toast.success("✅ Product updated successfully")
-      router.push(`/dashboard/products/${id}`)
+      toast.success("✅ Product updated successfully");
+      router.push(`/dashboard/products/${id}`);
     } catch (error) {
-      console.error(error)
-      toast.error("❌ Failed to update product")
+      console.error(error);
+      toast.error("❌ Failed to update product");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading product...</div>
       </div>
-    )
+    );
   }
 
   if (error || !product) {
@@ -195,7 +200,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       <div className="flex items-center justify-center h-64">
         <p className="text-destructive">Product not found</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -232,7 +237,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                     {...register("name", { required: "Name is required" })}
                   />
                   {errors.name && (
-                    <p className="text-red-500 text-sm">{errors.name.message}</p>
+                    <p className="text-red-500 text-sm">
+                      {errors.name.message}
+                    </p>
                   )}
                 </div>
 
@@ -262,7 +269,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                       {...register("price", { required: "Price is required" })}
                     />
                     {errors.price && (
-                      <p className="text-red-500 text-sm">{errors.price.message}</p>
+                      <p className="text-red-500 text-sm">
+                        {errors.price.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -273,7 +282,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                       {...register("stock", { required: "Stock is required" })}
                     />
                     {errors.stock && (
-                      <p className="text-red-500 text-sm">{errors.stock.message}</p>
+                      <p className="text-red-500 text-sm">
+                        {errors.stock.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -286,7 +297,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                       })}
                     />
                     {errors.discount && (
-                      <p className="text-red-500 text-sm">{errors.discount.message}</p>
+                      <p className="text-red-500 text-sm">
+                        {errors.discount.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -428,7 +441,10 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                     control={control}
                     rules={{ required: "Category is required" }}
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -448,6 +464,40 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                   {errors.category && (
                     <p className="text-red-500 text-sm">
                       {errors.category.message}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="collectionType">CollectionType *</Label>
+                  <Controller
+                    name="collectionType"
+                    control={control}
+                    rules={{ required: "Collection Type is required" }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Collection Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["popular", "just-launched", "trending"].map(
+                            (c: any) => (
+                              <SelectItem key={c} value={c}>
+                                {c}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.collectionType && (
+                    <p className="text-red-500 text-sm">
+                      {errors.collectionType.message}
                     </p>
                   )}
                 </div>
@@ -475,5 +525,5 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         </div>
       </form>
     </div>
-  )
+  );
 }
