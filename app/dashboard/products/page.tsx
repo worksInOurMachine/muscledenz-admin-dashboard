@@ -209,6 +209,10 @@ export default function ProductsPage() {
                       {/* Removed hidden sm:table-cell for Category header */}
                       <TableHead className="min-w-[100px]">Category</TableHead>
                       <TableHead className="min-w-[100px]">Price</TableHead>
+                      <TableHead className="min-w-[100px]">
+                        CollectionType
+                      </TableHead>
+
                       <TableHead className="min-w-[120px]">Stock</TableHead>
                       <TableHead className="text-right w-[80px]">
                         Actions
@@ -248,6 +252,9 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell className="font-medium">
                             ₹{product.price}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {product?.collectionType || ""}
                           </TableCell>
                           <TableCell>
                             <Badge variant={stockStatus.variant}>
