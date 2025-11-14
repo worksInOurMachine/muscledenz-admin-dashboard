@@ -287,6 +287,7 @@ export default function HomePageEditor() {
           toast.error(
             "Please upload exactly 4 images for the About section ❌"
           );
+          return;
         }
         payload.about_images = data.about_images.map((img) => img.id);
       } else if (section === "reviews") {
