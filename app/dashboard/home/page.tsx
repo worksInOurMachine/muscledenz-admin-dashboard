@@ -374,7 +374,7 @@ export default function HomePageEditor() {
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 text-gray-800">
       <header className="mb-8 border-b pb-4">
-        <h1 className="text-4xl font-extrabold text-blue-600 flex items-center">
+        <h1 className="text-4xl font-extrabold text-black flex items-center">
           <RefreshCw
             className="w-6 h-6 mr-3 text-black cursor-pointer hover:text-gray-500 transition-colors"
             onClick={fetchData}
