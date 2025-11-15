@@ -484,13 +484,19 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                           <SelectValue placeholder="Select Collection Type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {["popular", "just-launched", "trending"].map(
-                            (c: any) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
-                              </SelectItem>
-                            )
-                          )}
+                          {[
+                            "popular",
+                            "just-launched",
+                            "ayurveda",
+                            "trending",
+                            "consmetics-and-skincare",
+                            "protein-supplements",
+                            "sports-wears",
+                          ].map((c: any) => (
+                            <SelectItem key={c} value={c}>
+                              {c}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     )}

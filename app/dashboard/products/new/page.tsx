@@ -351,7 +351,7 @@ export default function NewProductPage() {
               </CardContent>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">CollectionType *</Label>
                   <Select
                     value={formData.collectionType}
                     onValueChange={(value) =>
@@ -363,13 +363,19 @@ export default function NewProductPage() {
                       <SelectValue placeholder="Select Collection Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {["popular", "just-launched", "trending"]?.map(
-                        (c: any) => (
-                          <SelectItem key={c} value={String(c)}>
-                            {c}
-                          </SelectItem>
-                        )
-                      )}
+                      {[
+                        "popular",
+                        "just-launched",
+                        "ayurveda",
+                        "trending",
+                        "consmetics-and-skincare",
+                        "protein-supplements",
+                        "sports-wears",
+                      ]?.map((c: any) => (
+                        <SelectItem key={c} value={String(c)}>
+                          {c}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
