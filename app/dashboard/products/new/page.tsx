@@ -368,7 +368,7 @@ export default function NewProductPage() {
                         "just-launched",
                         "ayurveda",
                         "trending",
-                        "consmetics-and-skincare",
+                        "cosmetics-and-skincare",
                         "protein-supplements",
                         "sports-wears",
                       ]?.map((c: any) => (
