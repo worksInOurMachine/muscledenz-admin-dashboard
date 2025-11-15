@@ -489,7 +489,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                             "just-launched",
                             "ayurveda",
                             "trending",
-                            "consmetics-and-skincare",
+                            "cosmetics-and-skincare",
                             "protein-supplements",
                             "sports-wears",
                           ].map((c: any) => (
