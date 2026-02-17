@@ -375,7 +375,10 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                     Address
                   </p>
                   <p className="text-gray-600 dark:text-gray-400 ml-6">
-                    {order.user?.firstname + " " + order.user?.lastname}
+                    {order.user?.firstname + " " + order.user?.lastname + ","}
+                  </p>
+                   <p className="text-gray-600 dark:text-gray-400 ml-6">
+                    {order?.address?.phone}
                   </p>
                   <p className="text-gray-600 dark:text-gray-400 ml-6">
                     {[
