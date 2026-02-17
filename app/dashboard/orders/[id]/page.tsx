@@ -350,7 +350,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
                   </h3>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                     <p>{order.user?.email}</p>
-                    <p>{order.user?.phone}</p>
+                    <p>{order.address?.phone}</p>
                   </div>
                 </div>
 
